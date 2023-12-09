@@ -94,7 +94,7 @@
         /// <param name="speed">Speed in meters per second</param>
         /// <returns>Whether or not there is a valid speed</returns>
         public static bool TryGetSpeedFromHeightPotential(float gravity, float currentHeight, float heightPotential, out float speed) {
-            float speedSq = (heightPotential - currentHeight) * -2 * gravity;
+            float speedSq = (heightPotential - currentHeight) * 2 * gravity;
             if (speedSq <= 0) {
                 speed = default; // Imaginary speed :sparkles:
                 return false;

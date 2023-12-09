@@ -31,7 +31,10 @@ namespace HiHi {
     public class PeerNetwork {
         public ICollection<ushort> PeerIDs => connections.Keys;
         public int Connections => connections.Count;
-        public bool Connected => connections.Count > 0; 
+        public bool Connected => connections.Count > 0;
+        public uint Hash => (uint)connections
+            .Select(c => c.Key)
+            .Sum(c => c) + (uint)Peer.Info.UniqueID;
 
         private ConcurrentDictionary<ushort, PeerInfo> connections { get; set; }
         private Random syncedRandom;

@@ -11,8 +11,7 @@ namespace Stupid.stujam01 {
 
         [Header("References")]
         [SerializeField] private MapGenerator mapGenerator;
-
-        private Democracy<uint> matchSeedDemocracy;
+        [SerializeField] private UnitySpawnData humanPlayerSpawnData;
 
         private int requiredPlayers;
 
@@ -20,12 +19,6 @@ namespace Stupid.stujam01 {
             this.requiredPlayers = requiredPlayers;
 
             Coroutiner.Start(StartMatchRoutine());
-        }
-
-        protected override void OnRegister() {
-            base.OnRegister();
-
-            matchSeedDemocracy = new Democracy<uint>(this, () => Random.GetSeed());
         }
 
         private void Start() {
@@ -37,17 +30,14 @@ namespace Stupid.stujam01 {
             while (HiHiTime.Time < COUNTDOWN_DURATION && Peer.Network.Connections + 1 < requiredPlayers) {
                 yield return new WaitForEndOfFrame();
             }
-
+            
             yield return new WaitForSeconds(1f);
 
-            matchSeedDemocracy.Clear();
-            matchSeedDemocracy.AskAll();
+            Debug.Log($"Generating map with seed {Peer.Network.Hash}");
 
-            yield return new WaitUntil(() => matchSeedDemocracy.ConsensusReached);
+            mapGenerator.Generate(Peer.Network.Hash);
 
-            mapGenerator.Generate(matchSeedDemocracy.Consensus);
-
-
+            INetworkObject.SyncSpawn(humanPlayerSpawnData, Peer.Info.UniqueID);
 
             yield break;
         }

@@ -24,6 +24,25 @@
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT EXPRESS OR IMPLIED WARRANTY OF ANY KIND, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 namespace HiHi {
+    public struct HiHiFloat : ISerializable {
+        public float Value;
+
+        public HiHiFloat(float Value) {
+            this.Value = Value;
+        }
+
+        void ISerializable.Serialize(BitBuffer buffer) {
+            buffer.AddUShort(HalfPrecision.Quantize(Value));
+        }
+
+        void ISerializable.Deserialize(BitBuffer buffer) {
+            Value = HalfPrecision.Dequantize(buffer.ReadUShort());
+        }
+
+        public static implicit operator float(HiHiFloat from) => from.Value;
+        public static implicit operator HiHiFloat(float from) => new HiHiFloat(from);
+    }
+
     public partial struct HiHiVector2 : ISerializable {
         public float X;
         public float Y;

@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 78aaa5d5225ef604bb471592badad43a, type: 3}
   m_Name: HumanPlayerSpawnData
   m_EditorClassIdentifier: 
-  Prefab: {fileID: 0}
+  Prefab: {fileID: 3948839874127794284, guid: 52fefa1addc153541928eece95d4c94d, type: 3}

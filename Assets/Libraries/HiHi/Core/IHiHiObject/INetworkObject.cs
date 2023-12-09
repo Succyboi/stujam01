@@ -369,7 +369,7 @@ namespace HiHi {
         }
 
         public void UpdateSyncObjects() {
-            foreach (KeyValuePair<byte, SyncObject> syncObjectPair in syncObjects) {
+            foreach (KeyValuePair<byte, SyncObject> syncObjectPair in SyncObjects) {
                 syncObjectPair.Value.Update();
             }
         }
