@@ -9,6 +9,11 @@ namespace Stupid.stujam01 {
 
         private Vector2 rotation;
 
+        private void Start() {
+            //DO PROPERLY
+            input.LockCursor();
+        }
+
         private void Update() {
             if (!player.NetworkObject.Authorized) { return; }
 
@@ -20,6 +25,10 @@ namespace Stupid.stujam01 {
 
             if (input.JumpPressed) {
                 player.Jump();
+            }
+
+            if(input.ThrowPressed) {
+                player.Throw();
             }
         }
     }

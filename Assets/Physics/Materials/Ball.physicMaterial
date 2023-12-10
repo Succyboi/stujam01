@@ -6,9 +6,9 @@ PhysicMaterial:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Default
+  m_Name: Ball
   dynamicFriction: 1
   staticFriction: 0.25
-  bounciness: 0.25
-  frictionCombine: 0
-  bounceCombine: 0
+  bounciness: 0.5
+  frictionCombine: 1
+  bounceCombine: 3

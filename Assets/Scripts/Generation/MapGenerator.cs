@@ -46,11 +46,24 @@ namespace Stupid.stujam01 {
         }
 
         public void Clear() {
+            if(map == null) { return; }
+
             for (int x = 0; x < map.Size.x; x++) {
                 for (int y = 0; y < map.Size.y; y++) {
                     Destroy(map.Parts[x, y]);
                 }
             }
+
+            map = null;
+        }
+
+        public Vector3 GetRandomSpawnPosition() {
+            Random random = new Random();
+
+            Vector2Int mapPartIndex = new Vector2Int(random.Range(0, map.Size.x - 1), random.Range(0, map.Size.y - 1));
+            MapPart part = map.Parts[mapPartIndex.x, mapPartIndex.y];
+
+            return part.spawnPosition;
         }
 
         private MapPart GetRandomPart() {

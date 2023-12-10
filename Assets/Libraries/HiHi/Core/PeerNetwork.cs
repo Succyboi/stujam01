@@ -29,12 +29,13 @@ using System.Linq;
  */
 namespace HiHi {
     public class PeerNetwork {
-        public ICollection<ushort> PeerIDs => connections.Keys;
+        public IEnumerable<ushort> PeerIDs => connections.Keys.Append(Peer.Info.UniqueID);
+        public int PeerCount => Connections + 1;
+        public ICollection<ushort> ConnectionIDs => connections.Keys;
         public int Connections => connections.Count;
         public bool Connected => connections.Count > 0;
-        public uint Hash => (uint)connections
-            .Select(c => c.Key)
-            .Sum(c => c) + (uint)Peer.Info.UniqueID;
+        public uint Hash => (uint)PeerIDs
+            .Sum(c => c);
 
         private ConcurrentDictionary<ushort, PeerInfo> connections { get; set; }
         private Random syncedRandom;
@@ -89,7 +90,7 @@ namespace HiHi {
         }
 
         public ushort GetRandomPeerID() {
-            IEnumerable<ushort> peers = Peer.Network.PeerIDs.Append(Peer.Info.UniqueID);
+            IEnumerable<ushort> peers = Peer.Network.ConnectionIDs.Append(Peer.Info.UniqueID);
             return peers.Skip(Peer.Network.GetSyncedRandomUShort() % peers.Count()).First();
         }
 
@@ -100,9 +101,9 @@ namespace HiHi {
         #region Serialization
 
         public void SerializeConnections(BitBuffer buffer) {
-            buffer.AddUShort((ushort)PeerIDs.Count);
+            buffer.AddUShort((ushort)ConnectionIDs.Count);
 
-            foreach(ushort peerID in PeerIDs) {
+            foreach(ushort peerID in ConnectionIDs) {
                 connections[peerID].Serialize(buffer);
             }
         }

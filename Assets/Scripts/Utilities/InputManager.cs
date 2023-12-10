@@ -43,5 +43,19 @@ namespace Stupid.stujam01 {
         public bool MenuDown => Input.KeyDown(settings.MenuKey);
         public bool MenuPressed => Input.KeyPressed(settings.MenuKey);
         public bool MenuUp => Input.KeyUp(settings.MenuKey);
+
+        public bool ThrowDown => Input.MBDown(0);
+        public bool ThrowPressed => Input.MBPressed(0);
+        public bool ThrowUp => Input.MBUp(0);
+
+        public void LockCursor() {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
+
+        public void UnlockCursor() {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
     }
 }

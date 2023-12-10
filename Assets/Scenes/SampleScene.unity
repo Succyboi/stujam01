@@ -307,9 +307,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 401e304e0162e9d4aa73a72c7e27d814, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playersToStart: 1
+  settings:
+    PlayersToStart: 1
+    RespawnDuration: 2
+    MinDodgeballCount: 8
+    DodgeballsPerPlayer: 1
+  boundsHeight: -5
   mapGenerator: {fileID: 1977914529}
   humanPlayerSpawnData: {fileID: 11400000, guid: c4927a4008a6a684697bd9b1e3253544, type: 2}
+  dodgeballSpawnData: {fileID: 11400000, guid: f5b8eca33d76e2b49b91c3f1053bfe9e, type: 2}
 --- !u!1 &963194225
 GameObject:
   m_ObjectHideFlags: 0
@@ -562,6 +568,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   SpawnDataRegistry:
   - {fileID: 11400000, guid: c4927a4008a6a684697bd9b1e3253544, type: 2}
+  - {fileID: 11400000, guid: f5b8eca33d76e2b49b91c3f1053bfe9e, type: 2}
 --- !u!1 &1588275535
 GameObject:
   m_ObjectHideFlags: 0

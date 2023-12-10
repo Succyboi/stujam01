@@ -1,15 +1,25 @@
-using Cinemachine;
 using HiHi;
+using Stupid.Utilities;
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Net.Http.Headers;
 using UnityEngine;
 
 namespace Stupid.stujam01 {
     public class NetworkedPlayer : UnityNetworkObject {
+        public static Dictionary<ushort, NetworkedPlayer> Instances = new Dictionary<ushort, NetworkedPlayer>();
+
+        public event Action OnSpawned;
+        public event Action<NetworkedPlayer> OnDied;
+
+        public bool Alive => alive;
         public Vector3 Velocity => rigidbody.velocity;
         public float HorizontalSpeed => horizontalVelocity.magnitude;
         public float Speed => rigidbody.velocity.magnitude;
 
         [Header("State")]
+        [SerializeField] private bool alive;
         [SerializeField] private bool grounded;
         [SerializeField] private Cooldown groundedCoyoteTime = new Cooldown(0f);
 
@@ -39,6 +49,12 @@ namespace Stupid.stujam01 {
         [SerializeField] private float longjumpDistance;
         [SerializeField] private float highJumpHeight;
 
+        [Header("Dodgeball Interaction")]
+        [SerializeField] private Cooldown throwCoyoteTime = new Cooldown(0f);
+        [SerializeField] private Cooldown throwCooldown = new Cooldown(0f);
+        [SerializeField] private float dodgeballHoldInterpolationDuration;
+        [SerializeField] private float throwingSpeed;
+
         [Header("Physics Checks")]
         [SerializeField] private LayerMask groundedCheckMask;
         [SerializeField] private float groundCheckSkinThickness;
@@ -49,9 +65,10 @@ namespace Stupid.stujam01 {
         [SerializeField] private new Rigidbody rigidbody;
         [SerializeField] private new CapsuleCollider collider;
         [SerializeField] private Transform head;
+        [SerializeField] private Transform hand;
 
-        private float deltaTime => Time.fixedDeltaTime;
-        private float time => Time.time;
+        private float deltaTime => HiHiTime.DeltaTime;
+        private float time => HiHiTime.Time;
         private Vector3 horizontalVelocity => new Vector3(rigidbody.velocity.x, 0f, rigidbody.velocity.z);
         private Vector3 wishDirection => rigidbody.rotation * new Vector3(movementSync.Value.X, 0f, movementSync.Value.Y);
         private float gravity => (grounded && crouching)
@@ -63,7 +80,12 @@ namespace Stupid.stujam01 {
         private bool crouching => crouchSync.Value;
         private float standingT { get; set; } = 1f;
         private float height => Mathf.Lerp(crouchingHeight, standingHeight, standingT);
+        private Dodgeball dodgeball;
 
+        private MatchManager matchManager => MatchManager.Instance;
+
+        private RPC<HiHiVector3> spawnRPC;
+        private RPC<ushort> killRPC;
         private SyncPhysicsBody syncPhysicsBody;
         private Sync<HiHiVector2> movementSync;
         private Sync<bool> crouchSync;
@@ -78,6 +100,12 @@ namespace Stupid.stujam01 {
                 NetworkObject.AbandonmentPolicy = NetworkObjectAbandonmentPolicy.Destroy;
             }
 
+            spawnRPC = new RPC<HiHiVector3>(this);
+            spawnRPC.Action = new Action<HiHiVector3>(HandleSpawnRPC);
+
+            killRPC = new RPC<ushort>(this);
+            killRPC.Action = new Action<ushort>(HandleKillRPC);
+
             syncPhysicsBody = new SyncPhysicsBody(this);
             syncPhysicsBody.OnDeserialize += HandleSyncPhysicsBodyDeserialize;
 
@@ -86,21 +114,97 @@ namespace Stupid.stujam01 {
 
             jumpRPC = new RPC<HiHiFloat, HiHiFloat>(this);
             jumpRPC.Action = new Action<HiHiFloat, HiHiFloat>(HandleJumpRPC);
+
+            Instances.Add(NetworkObject.UniqueID, this);
         }
 
         protected override void OnUnregister() {
             base.OnUnregister();
 
             syncPhysicsBody.OnDeserialize -= HandleSyncPhysicsBodyDeserialize;
+
+            Instances.Remove(NetworkObject.UniqueID);
+        }
+
+        protected override void UpdateInstance() {
+            if (!alive) { return; }
+
+            HandleCrouching(deltaTime);
+            HandleBody(deltaTime);
+            HandleGroundedCheck(deltaTime);
+            HandlePhysics(deltaTime);
+            HandleJumping(deltaTime);
+            HandleMovement(deltaTime);
+            HandleNetworking(deltaTime);
+            HandleDodgeballInteraction(deltaTime);
         }
 
         private void HandleSyncPhysicsBodyDeserialize() {
+            if (!alive) { return; }
+
             rigidbody.velocity = syncPhysicsBody.LinearVelocity;
             rigidbody.angularVelocity = syncPhysicsBody.AngularVelocity;
         }
 
+        private void HandleSpawnRPC(HiHiVector3 spawnPosition) => SpawnLocal(spawnPosition);
+
+        private void HandleKillRPC(ushort player) {
+            Instances[player].KillLocal(this);
+        }
+
         private void HandleJumpRPC(HiHiFloat height, HiHiFloat distance) {
             Jump(height, distance);
+        }
+
+        #endregion
+
+        #region Death & Spawning
+
+        public void SyncSpawn(Vector3 spawnPosition) {
+            if (alive) { return; }
+
+            SpawnLocal(spawnPosition);
+            spawnRPC.Invoke(spawnPosition);
+        }
+
+        public void SyncKill(NetworkedPlayer player) {
+            if (!player.alive) { return; }
+
+            player.KillLocal(this);
+            killRPC.Invoke(player.NetworkObject.UniqueID);
+        }
+
+        public void Respawn() => Coroutiner.Start(RespawnRoutine());
+
+        private void SpawnLocal(Vector3 spawnPosition) {
+            if (alive) { return; }
+
+            rigidbody.isKinematic = false;
+            rigidbody.position = spawnPosition;
+
+            alive = true;
+            OnSpawned?.Invoke();
+        }
+
+        private void KillLocal(NetworkedPlayer killer) {
+            if (!alive) { return; }
+
+            rigidbody.isKinematic = true;
+
+            alive = false;
+            OnDied?.Invoke(killer);
+
+            if (NetworkObject.Authorized) {
+                Respawn();
+            }
+        }
+
+        private IEnumerator RespawnRoutine() {
+            yield return new WaitForSeconds(matchManager.Settings.RespawnDuration);
+
+            SyncSpawn(matchManager.GetRandomSpawnPosition());
+
+            yield break;
         }
 
         #endregion
@@ -133,19 +237,15 @@ namespace Stupid.stujam01 {
             jumpCoyoteTime.Start(time);
         }
 
+        public void Throw() {
+            if (!NetworkObject.Authorized) { return; }
+
+            throwCoyoteTime.Start(time);
+        }
+
         #endregion
 
         #region Movement
-
-        private void FixedUpdate() {
-            HandleCrouching(deltaTime);
-            HandleBody(deltaTime);
-            HandleGroundedCheck(deltaTime);
-            HandlePhysics(deltaTime);
-            HandleJumping(deltaTime);
-            HandleMovement(deltaTime);
-            HandleNetworking(deltaTime);
-        }
 
         private void HandleCrouching(float deltaTime) {
             float rawStandingT = crouching ? 0f : 1f;
@@ -265,6 +365,43 @@ namespace Stupid.stujam01 {
             rigidbody.velocity += UnityEngine.Vector3.up * (heightSpeed - distanceSpeed);
             rigidbody.velocity += (UnityEngine.Vector3)(wishDirection + Vector3.up) * distanceSpeed;
             grounded = false;
+        }
+
+        #endregion
+
+        #region Dodgeball Interaction
+
+        public bool TryPickUp(Dodgeball dodgeball) {
+            if(this.dodgeball != null) { return false; }
+
+            this.dodgeball = dodgeball;
+            dodgeball.transform.parent = hand;
+
+            return true;
+        }
+
+        public bool TryRelease() {
+            if(dodgeball == null) { return false; }
+
+            dodgeball.transform.parent = transform.parent;
+            dodgeball = null;
+
+            return true;
+        }
+
+        private void HandleDodgeballInteraction(float deltaTime) {
+            if (dodgeball == null) { return; }
+
+            dodgeball.transform.localPosition = Vector3.MoveTowards(dodgeball.transform.localPosition, Vector3.zero, deltaTime / dodgeballHoldInterpolationDuration);
+
+            if (!throwCooldown.IsFinished(time)) { return; }
+            if (throwCoyoteTime.IsFinished(time)) { return; }
+
+            throwCoyoteTime.Finish(time);
+            throwCooldown.Start(time);
+
+            dodgeball.Throw(head.forward, throwingSpeed);
+            TryRelease();
         }
 
         #endregion

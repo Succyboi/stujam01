@@ -99,7 +99,7 @@ namespace HiHi {
                 }
 
                 if (message.DestinationAll) {
-                    foreach(ushort peerID in Peer.Network.PeerIDs) {
+                    foreach(ushort peerID in Peer.Network.ConnectionIDs) {
                         if (!Peer.Network.Contains(peerID)) { continue; }
                         if (!HiHiUtility.TryParseStringToIPEndPoint(Peer.Network[peerID].RemoteEndPoint, out outgoingRemoteEndPoint)) { continue; }
 

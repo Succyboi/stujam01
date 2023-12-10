@@ -102,7 +102,7 @@ namespace HiHi {
 
             INetworkObject.UpdateInstances();
 
-            foreach (ushort peerID in Network.PeerIDs) {
+            foreach (ushort peerID in Network.ConnectionIDs) {
                 if (Network[peerID].ShouldRequestPing) {
                     PeerMessage pingMessage = NewMessage(PeerMessageType.PingRequest);
                     pingMessage.Buffer.AddUShort(HalfPrecision.Quantize(HiHiTime.RealTime));
@@ -194,7 +194,7 @@ namespace HiHi {
         public static void DisconnectAll() {
             if (!Initialized) { return; }
 
-            foreach (ushort connection in Network.PeerIDs) {
+            foreach (ushort connection in Network.ConnectionIDs) {
                 Disconnect(connection, PeerDisconnectReason.LocalPeerDisconnected);
             }
         }

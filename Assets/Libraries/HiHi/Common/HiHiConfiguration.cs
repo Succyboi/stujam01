@@ -23,7 +23,7 @@ namespace HiHi {
                 Peer.Connect(address);
                 string infoString = $"Local Peer ID: {Peer.Info.UniqueID} Local EndPoint: {Peer.Info.LocalEndPoint} Remote EndPoint: {Peer.Info.RemoteEndPoint}\n\nConnected to {Peer.Network.Connections} peers:\n";
 
-                foreach(ushort peerID in Peer.Network.PeerIDs) {
+                foreach(ushort peerID in Peer.Network.ConnectionIDs) {
                     PeerInfo peerInfo = Peer.Network[peerID];
 
                     infoString += $"{peerInfo}\n";

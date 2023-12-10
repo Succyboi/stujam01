@@ -101,7 +101,7 @@ namespace HiHi {
             return !Instances.ContainsKey(ID);
         }
 
-            public ushort Register(ushort? proposedUniqueID = null, ushort? ownerID = null, ISpawnData originSpawnData = null) {
+        public ushort Register(ushort? proposedUniqueID = null, ushort? ownerID = null, ISpawnData originSpawnData = null) {
             if (Registered) { return UniqueID; }
 
             UniqueID = proposedUniqueID ?? UniqueID;
@@ -127,8 +127,10 @@ namespace HiHi {
         public void UnRegister() {
             if (!Registered) { return; }
 
-            foreach(KeyValuePair<byte, SyncObject> syncObjectPair in syncObjects) {
-                UnregisterSyncObject(syncObjectPair.Value);
+            if(SyncObjects.Count > 0) {
+                foreach (KeyValuePair<byte, SyncObject> syncObjectPair in SyncObjects) {
+                    UnregisterSyncObject(syncObjectPair.Value);
+                }
             }
 
             availableIDs.Enqueue(UniqueID);
@@ -318,7 +320,7 @@ namespace HiHi {
                 case NetworkObjectAbandonmentPolicy.RemainOwnedRandomly:
                     if (!Owned) { break; }
 
-                    IEnumerable<ushort> candidates = Peer.Network.PeerIDs.Concat(new ushort[1] { Peer.Info.UniqueID }).OrderBy(p => p);
+                    IEnumerable<ushort> candidates = Peer.Network.ConnectionIDs.Concat(new ushort[1] { Peer.Info.UniqueID }).OrderBy(p => p);
                     ushort pickedID = candidates.Skip(UniqueID % candidates.Count()).First();
 
                     GiveToPeer(pickedID, true);

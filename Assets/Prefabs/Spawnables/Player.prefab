@@ -59,7 +59,7 @@ MonoBehaviour:
       inWeight: 0
       outWeight: 0.33333334
     - serializedVersion: 3
-      time: 16
+      time: 32
       value: 0
       inSlope: 0
       outSlope: 0
@@ -69,7 +69,7 @@ MonoBehaviour:
       outWeight: 0.33333334
     - serializedVersion: 3
       time: 64
-      value: 2
+      value: 0.25
       inSlope: 0
       outSlope: 0
       tangentMode: 136
@@ -81,7 +81,7 @@ MonoBehaviour:
     m_RotationOrder: 4
   swaySmoothingTime: 0.1
   swayMaxSpeed: 8
-  swayAmount: 0
+  swayAmount: 0.025
   player: {fileID: 4549139427545540700}
   camera: {fileID: 500022697937141646}
 --- !u!1 &547280319171857261
@@ -208,7 +208,39 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2556837440489677598}
+  - {fileID: 6781193680289808403}
   m_Father: {fileID: 5291121613314776943}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2150992793587156542
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6781193680289808403}
+  m_Layer: 7
+  m_Name: Hand
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6781193680289808403
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2150992793587156542}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.25, y: -0.35, z: 0.25}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4533370938982631864}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2346538117042426187
 GameObject:
@@ -249,7 +281,7 @@ CapsuleCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2346538117042426187}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: f14f97fa242f6f141bc6d15293e38784, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -313,6 +345,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3e7521c5eb122d84b8ec8b211a1e85d6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  alive: 0
   grounded: 0
   groundedCoyoteTime:
     Duration: 0.1
@@ -320,12 +353,12 @@ MonoBehaviour:
   crouchingHeight: 1
   radius: 0.5
   defaultGravity: 32
-  crouchGravity: 128
+  crouchGravity: 256
   maxSpeed: 8
   maxCrouchAccel: 0
-  maxGroundAccel: 64
+  maxGroundAccel: 128
   maxAirAccel: 64
-  maxDeccel: 16
+  maxDeccel: 32
   crouchDuration: 0.1
   jumpCoyoteTime:
     Duration: 0.1
@@ -334,6 +367,12 @@ MonoBehaviour:
   jumpHeight: 2
   longjumpDistance: 8
   highJumpHeight: 4
+  throwCoyoteTime:
+    Duration: 0.1
+  throwCooldown:
+    Duration: 0.25
+  dodgeballHoldInterpolationDuration: 0.1
+  throwingSpeed: 64
   groundedCheckMask:
     serializedVersion: 2
     m_Bits: 1
@@ -345,6 +384,7 @@ MonoBehaviour:
   rigidbody: {fileID: 4428301506181866407}
   collider: {fileID: 8837423578646344698}
   head: {fileID: 4533370938982631864}
+  hand: {fileID: 6781193680289808403}
 --- !u!54 &4428301506181866407
 Rigidbody:
   m_ObjectHideFlags: 0

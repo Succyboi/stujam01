@@ -196,7 +196,7 @@ namespace HiHi {
 
                 bool returnMessage = true;
                 if (message.DestinationAll) {
-                    foreach (ushort peerID in Peer.Network.PeerIDs) {
+                    foreach (ushort peerID in Peer.Network.ConnectionIDs) {
                         if (!Peer.Network.Contains(peerID)) { continue; }
 
                         Send(message, Peer.Network[peerID].RemoteEndPoint, out returnMessage);

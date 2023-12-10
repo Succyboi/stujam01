@@ -67,7 +67,7 @@ namespace HiHi {
         public override void Update() { }
 
         public void AskAll() {
-            foreach(ushort peerID in Peer.Network.PeerIDs) {
+            foreach(ushort peerID in Peer.Network.ConnectionIDs) {
                 Ask(peerID);
             }
 
@@ -104,7 +104,7 @@ namespace HiHi {
             if (isQuestion) {
                 ClearExpectedAnswers();
 
-                foreach (ushort peerID in Peer.Network.PeerIDs) {
+                foreach (ushort peerID in Peer.Network.ConnectionIDs) {
                     ExpectAnswer(peerID);
                 }
 
