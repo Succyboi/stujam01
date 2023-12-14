@@ -6,16 +6,23 @@ namespace Stupid.stujam01 {
         [SerializeField] private NetworkedPlayer player;
 
         private InputManager input => InputManager.Instance;
+        private MainMenu mainMenu => MainMenu.Instance;
 
         private Vector2 rotation;
 
-        private void Start() {
-            //DO PROPERLY
-            input.LockCursor();
-        }
-
         private void Update() {
             if (!player.NetworkObject.Authorized) { return; }
+            
+            if (input.MenuDown) {
+                if (mainMenu.Showing) {
+                    mainMenu.Hide();
+                }
+                else {
+                    mainMenu.Show();
+                }
+            }
+
+            if (mainMenu.Showing) { return; }
 
             rotation = new Vector2(rotation.x + input.MouseDelta.x, Mathf.Clamp(rotation.y - input.MouseDelta.y, -90f, 90f));
             player.SetRotation(rotation);
@@ -27,7 +34,7 @@ namespace Stupid.stujam01 {
                 player.Jump();
             }
 
-            if(input.ThrowPressed) {
+            if(input.ThrowDown) {
                 player.Throw();
             }
         }

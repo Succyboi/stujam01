@@ -127,10 +127,8 @@ namespace HiHi {
         public void UnRegister() {
             if (!Registered) { return; }
 
-            if(SyncObjects.Count > 0) {
-                foreach (KeyValuePair<byte, SyncObject> syncObjectPair in SyncObjects) {
-                    UnregisterSyncObject(syncObjectPair.Value);
-                }
+            while(SyncObjects.Count > 0) {
+               UnregisterSyncObject(SyncObjects[syncObjects.Keys.FirstOrDefault()]);
             }
 
             availableIDs.Enqueue(UniqueID);
@@ -364,8 +362,8 @@ namespace HiHi {
         }
 
         public void UnregisterSyncObject(SyncObject syncObject) {
+            SyncObjects.Remove(syncObject.UniqueID);
             availableSyncObjectIDs.Enqueue(syncObject.UniqueID);
-            SyncObjects[syncObject.UniqueID] = null;
 
             syncObject.OnUnregister();
         }

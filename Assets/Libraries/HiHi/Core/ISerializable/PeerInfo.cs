@@ -60,7 +60,8 @@ namespace HiHi {
 			get => localEndPoint;
 			set => localEndPoint = value;
         }
-		public Color Color {
+		public double Hue => UniqueID / (double)ushort.MaxValue;
+        public Color Color {
 			get {
 				if(color == null) {
 					double hue = UniqueID / (double)ushort.MaxValue * 360d;

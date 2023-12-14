@@ -3,6 +3,8 @@ using Cinemachine;
 
 namespace Stupid.stujam01 {
     public class PlayerCameraController : MonoBehaviour {
+        public Vector3 Sway => sway;
+
         [Header("Speed")]
         [SerializeField] private float speedSmoothingTime;
 
@@ -17,6 +19,7 @@ namespace Stupid.stujam01 {
         [Header("References")]
         [SerializeField] private NetworkedPlayer player;
         [SerializeField] private new CinemachineVirtualCamera camera;
+        [SerializeField] private CinemachineVirtualCamera deathCamera;
 
         private float speed;
         private float speedSmoothingVelocity;
@@ -25,13 +28,17 @@ namespace Stupid.stujam01 {
         private CinemachineBasicMultiChannelPerlin cameraShake;
         private float deltaTime => Time.deltaTime;
 
+        private PlayerScreen screen => PlayerScreen.Instance;
+
+        #region MonoBehaviour
+
         private void Start() {
             cameraShake = camera.GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>();
         }
 
         private void Update() {
             // HANDLE PROPERLY
-            camera.Priority = player.NetworkObject.Authorized
+            camera.Priority = player.IsLocalHumanPlayer
                 ? CameraConstants.PLAYER_ALIVE_PRIORITY
                 : CameraConstants.MIN_PRIORITY;
 
@@ -40,6 +47,36 @@ namespace Stupid.stujam01 {
             HandleSpeedWobble(deltaTime);
             HandleSway(deltaTime);
         }
+
+        public void Initialize() {
+            if (player.IsLocalHumanPlayer) {
+                screen.Initialize(player, this);
+            }
+
+            player.OnDied += HandlePlayerDied;
+            player.OnSpawned += HandlePlayerSpawned;
+        }
+
+        public void UnInitialize() {
+            if (player.IsLocalHumanPlayer) {
+                screen.UnInitialize();
+            }
+
+            player.OnDied -= HandlePlayerDied;
+            player.OnSpawned -= HandlePlayerSpawned;
+        }
+
+        private void HandlePlayerDied(NetworkedPlayer killer, Dodgeball dodgeball) {
+            deathCamera.Priority = player.IsLocalHumanPlayer ? CameraConstants.PLAYER_DEAD_PRIORITY : CameraConstants.MIN_PRIORITY;
+        }
+
+        private void HandlePlayerSpawned() {
+            deathCamera.Priority = CameraConstants.MIN_PRIORITY;
+        }
+
+        #endregion
+
+        #region Main Camera
 
         private void HandleReset(float deltaTime) {
             transform.localPosition = Vector3.zero;
@@ -60,5 +97,7 @@ namespace Stupid.stujam01 {
 
             transform.localPosition = -sway * swayAmount;
         }
+
+        #endregion
     }
 }

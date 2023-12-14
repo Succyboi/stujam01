@@ -185,12 +185,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   idle: 0
   held: 0
-  idleSpeedThreshold: 4
+  idleSpeedThreshold: 8
   minFloatHeight: 1.25
   maxFloatHeight: 0.75
   floatFrequency: 1
   floatSmoothingDuration: 0.5
   pickupRadius: 1.5
+  honingAngleThreshold: 180
+  honingDuration: 0.01
+  lethalVelocityThreshold: 16
   environmentMask:
     serializedVersion: 2
     m_Bits: 1
@@ -202,6 +205,7 @@ MonoBehaviour:
   gravity: 32
   rigidbody: {fileID: 7274892713102397324}
   collider: {fileID: 2438272222163617985}
+  renderer: {fileID: 1146877922033183669}
 --- !u!54 &7274892713102397324
 Rigidbody:
   m_ObjectHideFlags: 0

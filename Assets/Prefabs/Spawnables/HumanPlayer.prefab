@@ -12,6 +12,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: HumanPlayer
       objectReference: {fileID: 0}
+    - target: {fileID: 4549139427545540700, guid: d72c0267438beb04db3ab014d29c3522, type: 3}
+      propertyPath: isHumanPlayer
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5291121613314776943, guid: d72c0267438beb04db3ab014d29c3522, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0

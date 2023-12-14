@@ -12,11 +12,19 @@ namespace Stupid.stujam01 {
         private LiteNetTransport transport = new LiteNetTransport();
         private BroadcastFinder broadcastFinder = new BroadcastFinder();
 
+        public void StartDiscoveringOnLan() {
+            broadcastFinder.Start();
+        }
+
+        public void StopDiscoveringOnLan() {
+            broadcastFinder.Stop();
+        }
+
         private void Start() {
             Peer.Initialize(transport, helper);
+            Peer.AcceptingConnections = false;
 
             transport.Start();
-            broadcastFinder.Start();
 
             Peer.OnLog += HandleLog;
             Peer.OnConnect += HandleConnect;
