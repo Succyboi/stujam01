@@ -24,6 +24,7 @@ namespace Stupid.stujam01 {
 
         public MatchSettings Settings => settings;
         public bool CanAbort => Searching;
+        public bool UsingBots => useBotsSync.Value;
         public bool VotedToStartEarly => votedToStartEarly;
         public bool InMatch => matchOngoing || matchEnding;
         public bool MatchOngoing => matchOngoing;
@@ -52,14 +53,16 @@ namespace Stupid.stujam01 {
         private bool votedToStartEarly;
         private bool canLeave;
 
-        private Sync<ushort> StartEarlyVotesSync;
+        private Sync<ushort> startEarlyVotesSync;
+        private Sync<bool> useBotsSync;
 
         #region HiHi
 
         protected override void OnRegister() {
             base.OnRegister();
 
-            StartEarlyVotesSync = new Sync<ushort>(this);
+            startEarlyVotesSync = new Sync<ushort>(this);
+            useBotsSync = new Sync<bool>(this);
         }
 
         protected override void UpdateInstance() {
@@ -110,8 +113,8 @@ namespace Stupid.stujam01 {
 
         #region Match
 
-        public void StartSearchingForMatch() {
-            Coroutiner.Start(SearchForMatchRoutine());
+        public void StartSearchingForMatch(bool online) {
+            Coroutiner.Start(SearchForMatchRoutine(online));
         }
 
         public void AbortSearchingForMatch() {
@@ -122,7 +125,11 @@ namespace Stupid.stujam01 {
             if (votedToStartEarly) { return; }
 
             votedToStartEarly = true;
-            StartEarlyVotesSync.Value++;
+            startEarlyVotesSync.Value++;
+        }
+
+        public void SetUseBots(bool useBots) {
+            useBotsSync.Value = useBots;
         }
 
         public void LeaveMatch() => StartCoroutine(LeaveMatchRoutine());
@@ -179,21 +186,35 @@ namespace Stupid.stujam01 {
             yield break;
         }
 
-        private IEnumerator SearchForMatchRoutine() {
-            StartEarlyVotesSync.Value = 0;
+        private IEnumerator SearchForMatchRoutine(bool online) {
+            startEarlyVotesSync.Value = 0;
+            useBotsSync.Value = true;
             votedToStartEarly = false;
 
+            Peer.Info.RerollSelfAssignedID();
             Peer.ConnectionKey = $"{Application.companyName}/{Application.productName}/{Application.version}/{settings.PlayersToStart}";
             Peer.AcceptingConnections = Searching = true;
-            hihiManager.StartDiscoveringOnLan();
 
-            while (Players < settings.PlayersToStart && StartEarlyVotesSync.Value < Players) {
+            if (online) { 
+                hihiManager.StartDiscoveringOnline(settings.PlayersToStart);
+            }
+            else {
+                hihiManager.StartDiscoveringOnLan();
+            }
+
+            while (Players < settings.PlayersToStart && startEarlyVotesSync.Value < Players) {
                 Status = $"Searching{string.Empty.PadRight(Mathf.RoundToInt(HiHiTime.Time) % 3 + 1, '.')}\n{Players} of {settings.PlayersToStart} players found";
 
                 yield return new WaitForEndOfFrame();
 
                 if (!Searching) {
                     Peer.AcceptingConnections = Searching = false;
+                    if (online) {
+                        hihiManager.StopDiscoveringOnline();
+                    }
+                    else {
+                        hihiManager.StopDiscoveringOnLan();
+                    }
                     yield break;
                 }
             }
@@ -201,7 +222,12 @@ namespace Stupid.stujam01 {
             Status = $"Starting match";
 
             Peer.AcceptingConnections = Searching = false;
-            hihiManager.StopDiscoveringOnLan();
+            if (online) {
+                hihiManager.StopDiscoveringOnline();
+            }
+            else {
+                hihiManager.StopDiscoveringOnLan();
+            }
             matchOngoing = true;
 
             mainMenu.PlayMatchmakingSound();
@@ -238,14 +264,16 @@ namespace Stupid.stujam01 {
                 }
             }
 
-            for(int p = 0; p < settings.PlayersToStart - Peer.Network.PeerCount; p++) {
-                electedPlayerID = Peer.Network.PeerIDs.OrderBy(p => p).Skip(((int)Peer.Network.Hash + p) % Peer.Network.PeerCount).First();
+            if (useBotsSync.Value) {
+                for (int p = 0; p < settings.PlayersToStart - Peer.Network.PeerCount; p++) {
+                    electedPlayerID = Peer.Network.PeerIDs.OrderBy(p => p).Skip(((int)Peer.Network.Hash + p) % Peer.Network.PeerCount).First();
 
-                if (electedPlayerID != Peer.Info.UniqueID) { continue; }
+                    if (electedPlayerID != Peer.Info.UniqueID) { continue; }
 
-                NetworkedPlayer botPlayer = INetworkObject.SyncSpawn(botPlayerSpawnData, Peer.Info.UniqueID) as NetworkedPlayer;
-                botPlayer.SyncKill(botPlayer, null);
-                botPlayer.SyncSpawn(GetRandomSpawnPosition());
+                    NetworkedPlayer botPlayer = INetworkObject.SyncSpawn(botPlayerSpawnData, Peer.Info.UniqueID) as NetworkedPlayer;
+                    botPlayer.SyncKill(botPlayer, null);
+                    botPlayer.SyncSpawn(GetRandomSpawnPosition());
+                }
             }
 
             yield return new WaitForFixedUpdate();

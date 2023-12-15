@@ -134,6 +134,10 @@ namespace HiHi {
 			this.Verified = true;
 		}
 
+		public void RerollSelfAssignedID() {
+            SelfAssignedID = (ushort)random.Next(ushort.MaxValue);
+        }
+
         void ISerializable.Serialize(BitBuffer buffer) {
 			buffer.AddUShort(UniqueID);
 			buffer.AddString(ConnectionKey);

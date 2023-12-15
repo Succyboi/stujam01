@@ -23,7 +23,6 @@ namespace Stupid.stujam01 {
         [SerializeField] private LayerMask environmentMask;
         [SerializeField] private float spawnCheckHeightOffset;
         [SerializeField] private float spawnCheckHeightRadius;
-        [SerializeField] private bool canBeMirrored = true;
         [SerializeField] private bool canBeRotated = true;
 
         [Header("References")]
@@ -37,10 +36,6 @@ namespace Stupid.stujam01 {
 
             if (canBeRotated) {
                 transform.Rotate(Vector3.up, 90f * random.Range(0, 3));
-            }
-
-            if (canBeMirrored) {
-                transform.localScale = new Vector3(random.Bool ? 1f : -1f, 1f, random.Bool ? 1f : -1f);
             }
 
             if (registerNetworkObjects) {

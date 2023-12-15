@@ -22,6 +22,8 @@ namespace Stupid.stujam01 {
         [SerializeField] private MapGenerator mapGenerator;
         [SerializeField] private new Camera camera;
 
+        private SettingsManager settings => SettingsManager.Instance;
+
         #region Initialization
 
         protected override void Awake() {
@@ -31,6 +33,8 @@ namespace Stupid.stujam01 {
         }
 
         private IEnumerator InitializationRoutine() {
+            settings.Load();
+
             mapGenerator.Generate(Random.GetSeed(), false);
             ShowMainMenu();
 

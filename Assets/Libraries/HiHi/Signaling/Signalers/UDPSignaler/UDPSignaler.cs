@@ -83,7 +83,8 @@ namespace HiHi.Signaling {
                     connection.DesiredLobbySize = message.Buffer.ReadInt();
                     connection.RemoteEndPoint = message.SenderEndPoint;
                     connection.RegisterHeartbeat();
-                    LobbyConnection(connection);
+                    SendVerifiedPeerInfo(connection); // GAME JAM
+                    //LobbyConnection(connection); // GAME JAM
                     break;
 
                 case PeerMessageType.RemotePeerInfoRequest:
@@ -157,7 +158,7 @@ namespace HiHi.Signaling {
                 lobby = newLobby;
             }
 
-            SendVerifiedPeerInfo(info);
+            //SendVerifiedPeerInfo(info); //GAME JAM
 
             info.Lobby = lobby;
             OnPeerLobbied?.Invoke(info);
@@ -165,6 +166,7 @@ namespace HiHi.Signaling {
 
         private void SendVerifiedPeerInfo(SignalerConnectionInfo destinationInfo) {
             PeerMessage message = PeerMessage.Borrow(PeerMessageType.VerifiedPeerInfo, default, destinationInfo.RemoteEndPoint);
+            destinationInfo.Verified = true;
             destinationInfo.Serialize(message.Buffer);
             transport.Send(message);
         }

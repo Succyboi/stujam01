@@ -69,7 +69,7 @@ namespace HiHi.Discovery {
             SendHeartBeat();
         }
 
-        private void SendVerificationRequest() {
+        public void SendVerificationRequest() {
             PeerMessage message = PeerMessage.Borrow(PeerMessageType.VerifiedPeerInfoRequest, default, EndPoint);
             Peer.Info.Serialize(message.Buffer);
             message.Buffer.AddInt(LobbySize);

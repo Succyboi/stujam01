@@ -1270,7 +1270,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85a01ef08b2bbe44597a9bbf6db5e771, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  LogProcessedMessages: 0
+  logProcessedMessages: 0
+  signalerAddress: hihi.stupidplusplus.com
+  signalerPort: 28910
   helper: {fileID: 1053779699}
 --- !u!1 &930999595
 GameObject:
@@ -1717,6 +1719,7 @@ Transform:
   - {fileID: 1762065700}
   - {fileID: 400212926}
   - {fileID: 257275663}
+  - {fileID: 1993322236}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1762065699
@@ -1906,6 +1909,50 @@ Transform:
   - {fileID: 1977914530}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1993322235
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1993322236}
+  - component: {fileID: 1993322237}
+  m_Layer: 0
+  m_Name: SettingsManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1993322236
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1993322235}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1601470470}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1993322237
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1993322235}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c6a8f7fb6951f040aeac3290b06a21b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2068642272
 GameObject:
   m_ObjectHideFlags: 0

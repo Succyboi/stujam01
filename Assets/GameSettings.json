@@ -1,0 +1,15 @@
+{
+  "inputSettings": {
+    "MouseSensitivity": 0.075,
+    "LeftKey": 15,
+    "RightKey": 18,
+    "ForwardKey": 37,
+    "BackKey": 33,
+    "JumpKey": 1,
+    "CrouchKey": 51,
+    "MenuKey": 60
+  },
+  "Disclaimer": "Hiya! Sorry to make you edit settings in this dinky text file here. I just ran out of time and couldn't do a proper menu... Anyways, once you're finished editing, please restart your game to apply these settings. Much love, Pelle (Stupid++) (✿◡‿◡)",
+  "KeysInstruction": "Change your keybinds by changing the numbers in this file to one of the ones listed on the url below.",
+  "KeyListURL": "https://docs.unity3d.com/Packages/com.unity.inputsystem@1.0/api/UnityEngine.InputSystem.Key.html"
+}

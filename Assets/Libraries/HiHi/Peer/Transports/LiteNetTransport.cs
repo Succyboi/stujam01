@@ -162,8 +162,6 @@ namespace HiHi {
         #region Send
 
         public override void SendBroadcast(PeerMessage message) {
-            if (LocalPort == HiHiConfiguration.BROADCAST_RECEIVE_PORT) { return; }
-
             byte[] outgoingBuffer = new byte[MAX_PACKET_SIZE];
             int outgoingBufferLength = message.Buffer.ToArray(outgoingBuffer);
 

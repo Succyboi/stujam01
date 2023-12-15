@@ -60,8 +60,6 @@ namespace HiHi {
         }
 
         public override void SendBroadcast(PeerMessage message) {
-            if (LocalPort == HiHiConfiguration.BROADCAST_RECEIVE_PORT) { return; }
-
             message.DestinationEndPoint = HiHiConfiguration.BROADCAST_RECEIVE_ENDPOINT.ToEndPointString();
 
             Send(message);

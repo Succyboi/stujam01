@@ -24,6 +24,8 @@ namespace Stupid.stujam01 {
 
         [SerializeField] private Settings settings = new Settings();
 
+        public Settings InputSettings { get { return settings; } set { settings = value; } }
+
         public Vector2 MovementRaw => (Input.KeyPressed(settings.LeftKey) ? Vector2.left : Vector2.zero)
             + (Input.KeyPressed(settings.RightKey) ? Vector2.right : Vector2.zero)
             + (Input.KeyPressed(settings.ForwardKey) ? Vector2.up : Vector2.zero)
