@@ -21,6 +21,7 @@ namespace Stupid.stujam01 {
         }
 
         private void Start() {
+            HiHiConfiguration.DEFAULT_ABANDONMENT_POLICY = NetworkObjectAbandonmentPolicy.Destroy;
             Peer.Initialize(transport, helper);
             Peer.AcceptingConnections = false;
 

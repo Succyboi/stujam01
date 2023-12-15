@@ -24,6 +24,7 @@ namespace Stupid.stujam01 {
         [SerializeField] private float spawnCheckHeightOffset;
         [SerializeField] private float spawnCheckHeightRadius;
         [SerializeField] private bool canBeMirrored = true;
+        [SerializeField] private bool canBeRotated = true;
 
         [Header("References")]
         [SerializeField] private Transform spawnTransform;
@@ -34,7 +35,9 @@ namespace Stupid.stujam01 {
         public void Initialize(MapGenerator mapGenerator, Random random, bool registerNetworkObjects) {
             this.mapGenerator = mapGenerator;
 
-            transform.Rotate(Vector3.up, 90f * random.Range(0, 3));
+            if (canBeRotated) {
+                transform.Rotate(Vector3.up, 90f * random.Range(0, 3));
+            }
 
             if (canBeMirrored) {
                 transform.localScale = new Vector3(random.Bool ? 1f : -1f, 1f, random.Bool ? 1f : -1f);

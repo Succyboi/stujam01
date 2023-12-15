@@ -9,6 +9,13 @@ namespace Stupid.stujam01 {
 
         public bool Showing { get; private set; }
 
+        [Header("Audio")]
+        [SerializeField] private Sound clickSound;
+        [SerializeField] private Sound confirmSound;
+        [SerializeField] private Sound tickSound;
+        [SerializeField] private float backgroundMusicVolume;
+        [SerializeField] private float backgroundMusicVolumeAdjustDuration;
+
         [Header("References")]
         [SerializeField] private new CinemachineVirtualCamera camera;
         [SerializeField] private GameObject uiParent;
@@ -18,8 +25,12 @@ namespace Stupid.stujam01 {
         [SerializeField] private Button playLANButton;
         [SerializeField] private Button settingsButton;
         [SerializeField] private Button howToButton;
+        [SerializeField] private Button quitButton;
         [SerializeField] private MatchScreen matchScreen;
+        [SerializeField] private AudioSource backgroundMusicSource;
 
+        private GameUtility gameUtility => GameUtility.Instance;
+        private MatchManager matchManager => GameUtility.MatchManager;
         private InputManager input => InputManager.Instance;
 
         public void Show() {
@@ -36,6 +47,9 @@ namespace Stupid.stujam01 {
             playLANButton.onClick.AddListener(HandlePlayLanButtonClicked);
             settingsButton.onClick.AddListener(HandleSettingsButtonClicked);
             howToButton.onClick.AddListener(HandleHowToButtonClicked);
+            quitButton.onClick.AddListener(HandleQuitButtonClicked);
+
+            PlayTickSound();
 
             Showing = true;
         }
@@ -50,6 +64,9 @@ namespace Stupid.stujam01 {
             playLANButton.onClick.RemoveListener(HandlePlayLanButtonClicked);
             settingsButton.onClick.RemoveListener(HandleSettingsButtonClicked);
             howToButton.onClick.RemoveListener(HandleHowToButtonClicked);
+            quitButton.onClick.RemoveListener(HandleQuitButtonClicked);
+
+            PlayTickSound();
 
             Showing = false;
         }
@@ -63,19 +80,45 @@ namespace Stupid.stujam01 {
         private void HandlePlayOnlineButtonClicked() {
             rightMenu.SetActive(false);
             matchScreen.Show();
+
+            PlayClickSound();
         }
 
         private void HandlePlayLanButtonClicked() {
             rightMenu.SetActive(false);
             matchScreen.Show();
+
+            PlayClickSound();
         }
 
         private void HandleSettingsButtonClicked() {
-
+            PlayClickSound();
         }
 
         private void HandleHowToButtonClicked() {
-
+            PlayClickSound();
         }
+
+        private void HandleQuitButtonClicked() {
+            gameUtility.Quit();
+
+            PlayClickSound();
+        }
+
+        private void Update() {
+            HandleSound();
+        }
+
+        #region Sound
+
+        public void PlayClickSound() => clickSound.Play();
+        public void PlayMatchmakingSound() => confirmSound.Play();
+        public void PlayTickSound() => tickSound.Play();
+
+        private void HandleSound() {
+            backgroundMusicSource.volume = Mathf.MoveTowards(backgroundMusicSource.volume, (Showing && !matchManager.InMatch) ? backgroundMusicVolume : 0f, Time.deltaTime / backgroundMusicVolumeAdjustDuration);
+        }
+
+        #endregion
     }
 }

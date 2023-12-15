@@ -12,7 +12,13 @@ namespace Stupid.stujam01 {
         public event Action OnSpawned;
         public event Action<NetworkedPlayer, Dodgeball> OnDied;
         public event Action OnJump;
+        public event Action OnRegularJump;
+        public event Action OnLongJump;
+        public event Action OnHighJump;
+        public event Action OnPickup;
         public event Action OnThrow;
+        public event Action<bool> OnCrouchChanged;
+        public event Action<ushort> OnScoreChanged;
 
         public bool IsHumanPlayer => isHumanPlayer;
         public bool IsLocalHumanPlayer => isHumanPlayer && NetworkObject.Authorized;
@@ -20,6 +26,7 @@ namespace Stupid.stujam01 {
         public ushort Score => scoreSync.Value;
         public bool HoldingBall => dodgeball != null;
         public bool Moving => wishDirection.magnitude > 0 && alive;
+        public bool Grounded => grounded;
         public bool Crouching => crouching;
         public float StandingT => standingT;
         public Vector3 Velocity => rigidbody.velocity;
@@ -28,6 +35,7 @@ namespace Stupid.stujam01 {
         public float Speed => rigidbody.velocity.magnitude;
         public float DefaultGravity => defaultGravity;
         public Vector3 Center => transform.position + UnityEngine.Vector3.up * height / 2f;
+        public Vector3 Position => transform.position;
         public Transform Head => head;
         public Collider AuraCollider => auraCollider;
 
@@ -85,6 +93,7 @@ namespace Stupid.stujam01 {
         [SerializeField] private Transform remoteHand;
         [SerializeField] private PlayerCameraController cameraController;
         [SerializeField] private PlayerBody body;
+        [SerializeField] private new PlayerAudio audio;
 
         private float deltaTime => HiHiTime.DeltaTime;
         private float time => HiHiTime.Time;
@@ -121,10 +130,7 @@ namespace Stupid.stujam01 {
 
             cameraController.Initialize();
             body.Initialize();
-
-            if (NetworkObject.Authorized) {
-                NetworkObject.AbandonmentPolicy = NetworkObjectAbandonmentPolicy.Destroy;
-            }
+            audio.Initialize();
 
             spawnRPC = new RPC<HiHiVector3>(this);
             spawnRPC.Action = new Action<HiHiVector3>(HandleSpawnRPC);
@@ -137,6 +143,7 @@ namespace Stupid.stujam01 {
 
             movementSync = new Sync<HiHiVector2>(this);
             crouchSync = new Sync<bool>(this);
+            crouchSync.OnValueChanged += OnCrouchChanged;
 
             jumpRPC = new RPC<HiHiFloat, HiHiFloat>(this);
             jumpRPC.Action = new Action<HiHiFloat, HiHiFloat>(HandleJumpRPC);
@@ -148,6 +155,7 @@ namespace Stupid.stujam01 {
             throwRPC.Action = new Action<HiHiVector3, HiHiVector3, HiHiFloat>(HandleThrowRPC);
 
             scoreSync = new Sync<ushort>(this);
+            scoreSync.OnValueChanged += OnScoreChanged;
 
             Instances.Add(NetworkObject.UniqueID, this);
         }
@@ -157,8 +165,11 @@ namespace Stupid.stujam01 {
 
             cameraController.UnInitialize();
             body.UnInitialize();
+            audio.Uninitialize();
 
             syncPhysicsBody.OnDeserialize -= HandleSyncPhysicsBodyDeserialize;
+            crouchSync.OnValueChanged -= OnCrouchChanged;
+            scoreSync.OnValueChanged -= OnScoreChanged;
 
             Instances.Remove(NetworkObject.UniqueID);
         }
@@ -278,7 +289,12 @@ namespace Stupid.stujam01 {
         public void SetCrouch(bool crouch) {
             if (!NetworkObject.Authorized) { return; }
 
+            bool changed = crouch != crouchSync.Value;
             crouchSync.Value = crouch;
+
+            if (changed) {
+                OnCrouchChanged?.Invoke(crouch);
+            }
         }
 
         public void SetRotation(Vector2 rotation) {
@@ -437,6 +453,18 @@ namespace Stupid.stujam01 {
             grounded = false;
 
             OnJump?.Invoke();
+
+            if(height > jumpHeight) {
+                OnHighJump?.Invoke();
+            }
+            else {
+                if(distance > 0f) {
+                    OnLongJump?.Invoke();
+                }
+                else {
+                    OnRegularJump?.Invoke();
+                }
+            }
         }
 
         #endregion
@@ -464,6 +492,8 @@ namespace Stupid.stujam01 {
             this.dodgeball = dodgeball;
             dodgeball.transform.parent = hand;
             dodgeball.Hold(this);
+
+            OnPickup?.Invoke();
         }
 
         private void SyncThrow() {

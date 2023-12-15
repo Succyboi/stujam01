@@ -46,6 +46,7 @@ namespace Stupid.stujam01 {
 
         private GameUtility gameUtility => GameUtility.Instance;
         private HiHiManager hihiManager => GameUtility.HiHiManager;
+        private MainMenu mainMenu => MainMenu.Instance;
         private bool matchOngoing;
         private bool matchEnding;
         private bool votedToStartEarly;
@@ -124,10 +125,35 @@ namespace Stupid.stujam01 {
             StartEarlyVotesSync.Value++;
         }
 
-        public void LeaveMatch() {
-            if(!InMatch) { return; }
+        public void LeaveMatch() => StartCoroutine(LeaveMatchRoutine());
+
+        public bool TryGetSafeSpawnPosition(out Vector3 spawnPosition) {
+            foreach(MapPart mapPart in mapGenerator.GetMapParts()) {
+                if (!mapPart.SpawnIsVisible()) {
+                    spawnPosition = mapPart.SpawnPosition;
+                    return true;
+                }
+            }
+
+            spawnPosition = GetRandomSpawnPosition();
+            return false;
+        }
+
+        public Vector3 GetRandomSpawnPosition() {
+            Random random = new Random();
+            MapPart part = mapGenerator.GetMapParts()
+                .OrderBy(p => random.UInt)
+                .FirstOrDefault();
+
+            return part.SpawnPosition;
+        }
+
+        private IEnumerator LeaveMatchRoutine() {
+            if (!InMatch) { yield break; }
 
             Peer.DisconnectAll();
+
+            yield return new WaitForFixedUpdate();
 
             while (NetworkedPlayer.Instances.Count > 0) {
                 NetworkedPlayer player = NetworkedPlayer.Instances[NetworkedPlayer.Instances.Keys.FirstOrDefault()];
@@ -149,27 +175,8 @@ namespace Stupid.stujam01 {
             canLeave = false;
             matchEnding = false;
             matchOngoing = false;
-        }
 
-        public bool TryGetSafeSpawnPosition(out Vector3 spawnPosition) {
-            foreach(MapPart mapPart in mapGenerator.GetMapParts()) {
-                if (!mapPart.SpawnIsVisible()) {
-                    spawnPosition = mapPart.SpawnPosition;
-                    return true;
-                }
-            }
-
-            spawnPosition = GetRandomSpawnPosition();
-            return false;
-        }
-
-        public Vector3 GetRandomSpawnPosition() {
-            Random random = new Random();
-            MapPart part = mapGenerator.GetMapParts()
-                .OrderBy(p => random.UInt)
-                .FirstOrDefault();
-
-            return part.SpawnPosition;
+            yield break;
         }
 
         private IEnumerator SearchForMatchRoutine() {
@@ -197,10 +204,12 @@ namespace Stupid.stujam01 {
             hihiManager.StopDiscoveringOnLan();
             matchOngoing = true;
 
+            mainMenu.PlayMatchmakingSound();
             yield return new WaitForSeconds(settings.MatchStartStepInterval);
 
             Status = $"Generating map with seed {Peer.Network.Hash}";
 
+            mainMenu.PlayTickSound();
             yield return new WaitForSeconds(settings.MatchStartStepInterval);
 
             mapGenerator.Clear();
@@ -209,6 +218,7 @@ namespace Stupid.stujam01 {
             for (int c = 0; c < settings.PreMatchCountDown; c++) {
                 Status = $"{settings.PreMatchCountDown - c}";
 
+                mainMenu.PlayTickSound();
                 yield return new WaitForSeconds(settings.MatchStartStepInterval);
             }
 
@@ -260,7 +270,7 @@ namespace Stupid.stujam01 {
 
             Status = "Match ended";
 
-            LeaveMatch();
+            yield return StartCoroutine(LeaveMatchRoutine());
 
             matchEnding = false;
 

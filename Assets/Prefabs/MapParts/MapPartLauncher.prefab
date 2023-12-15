@@ -261,7 +261,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7503591118064275380, guid: c0f50fe2684e00e4fba7fc9cb91d0ce9, type: 3}
       propertyPath: settings.Weight
-      value: 0.5
+      value: 0.25
       objectReference: {fileID: 0}
     - target: {fileID: 7503591118064275380, guid: c0f50fe2684e00e4fba7fc9cb91d0ce9, type: 3}
       propertyPath: networkObjects.Array.size

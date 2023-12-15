@@ -8,8 +8,13 @@ namespace Stupid.stujam01 {
     public class Dodgeball : UnityNetworkObject {
         public static Dictionary<ushort, Dodgeball> Instances = new Dictionary<ushort, Dodgeball>();
 
+        public event Action OnBounce;
+        public event Action OnThrow;
+        public event Action OnIdle;
+
         public bool Idle => idle;
         public Vector3 Velocity => rigidbody.velocity;
+        public Vector3 Position => transform.position;
 
         [Header("State")]
         [SerializeField] private bool idle;
@@ -43,6 +48,7 @@ namespace Stupid.stujam01 {
         [SerializeField] private new Rigidbody rigidbody;
         [SerializeField] private new SphereCollider collider;
         [SerializeField] private new MeshRenderer renderer;
+        [SerializeField] private new DodgeballAudio audio;
 
         private MatchManager matchManager => GameUtility.MatchManager;
 
@@ -65,6 +71,8 @@ namespace Stupid.stujam01 {
         protected override void OnRegister() {
             base.OnRegister();
 
+            audio.Initialize();
+
             syncPhysicsBody = new SyncPhysicsBody(this);
             syncPhysicsBody.OnDeserialize += HandleSyncPhysicsBodyDeserialize;
 
@@ -80,6 +88,8 @@ namespace Stupid.stujam01 {
 
         protected override void OnUnregister() {
             base.OnUnregister();
+
+            audio.Uninitialize();
 
             NetworkObject.OnOwnershipChanged -= HandleOwnershipChanged;
 
@@ -129,6 +139,8 @@ namespace Stupid.stujam01 {
 
             transform.position = position;
             rigidbody.velocity = direction * speed;
+
+            OnThrow?.Invoke();
         }
 
         public void Hold(NetworkedPlayer player) {
@@ -187,6 +199,8 @@ namespace Stupid.stujam01 {
             if (!thrower.NetworkObject.Authorized) { return; }
 
             thrower.SyncKill(player, this);
+
+            OnBounce?.Invoke();
         }
 
         #endregion
@@ -210,6 +224,8 @@ namespace Stupid.stujam01 {
             rigidbody.velocity = Vector3.zero;
 
             idle = true;
+
+            OnIdle?.Invoke();
         }
 
         private void HandleFloating(float deltaTime) {
@@ -272,6 +288,8 @@ namespace Stupid.stujam01 {
         }
 
         private void OnCollisionEnter(Collision collision) {
+            OnBounce?.Invoke();
+
             if (!honing || !atLethalVelocity) { return; }
 
             NetworkedPlayer player = collision.collider.GetComponentInParent<NetworkedPlayer>();

@@ -19,6 +19,7 @@ namespace Stupid.stujam01 {
         [SerializeField] private MeshRenderer[] renderers;
 
         private float time => HiHiTime.Time;
+        private bool launching;
 
         private RPC<HiHiFloat> launchRPC;
         private RPC<ushort> launchPlayerRPC;
@@ -72,9 +73,14 @@ namespace Stupid.stujam01 {
             launchRPC.Invoke(launchTime);
         }
 
-        private void LocalLaunch(float launchTime) => StartCoroutine(LaunchRoutine(launchTime));
+        private void LocalLaunch(float launchTime) {
+            if (launching) { return; }
+
+            StartCoroutine(LaunchRoutine(launchTime));
+        }
 
         private IEnumerator LaunchRoutine(float launchTime) {
+            launching = true;
             launchDelay.Start(launchTime);
 
             while (!launchDelay.IsFinished(time)) {
@@ -100,6 +106,7 @@ namespace Stupid.stujam01 {
                 platform.MovePosition(transform.position + transform.up * launchCurve.Evaluate(launchCooldown.Progress(time)));
             }
 
+            launching = false;
             yield break;
         }
 

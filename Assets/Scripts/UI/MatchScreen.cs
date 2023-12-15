@@ -45,10 +45,14 @@ namespace Stupid.stujam01 {
                 Hide();
                 mainMenu.ResetMenu();
             }
+
+            mainMenu.PlayClickSound();
         }
 
         private void HandleStartEarlyButtonPressed() {
             matchManager.VoteToStartEarly();
+
+            mainMenu.PlayClickSound();
         }
 
         private void Update() {

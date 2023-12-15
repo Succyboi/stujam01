@@ -1,4 +1,5 @@
 ﻿using HiHi.Serialization;
+using System;
 
 /*
  * ANTI-CAPITALIST SOFTWARE LICENSE (v 1.4)
@@ -25,6 +26,8 @@
  */
 namespace HiHi {
     public class Sync<T> : SyncObject {
+        public event Action<T> OnValueChanged;
+
         public T Value {
             get {
                 return value;
@@ -37,6 +40,10 @@ namespace HiHi {
                     : !this.value.Equals(value);
 
                 this.value = value;
+
+                if (Dirty) {
+                    OnValueChanged?.Invoke(value);
+                }
             }
         }
         public bool Dirty { get; private set; }
@@ -65,6 +72,7 @@ namespace HiHi {
 
         public override void Deserialize(BitBuffer buffer) {
             value = value.Deserialize(buffer);
+            OnValueChanged?.Invoke(value);
 
             base.Deserialize(buffer);
         }

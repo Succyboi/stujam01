@@ -10,6 +10,8 @@ namespace Stupid.stujam01 {
         public static MapGenerator MapGenerator => Instance.mapGenerator;
         public static Camera Camera => Instance.camera;
 
+        [SerializeField] private float quitDelay = 1f;
+
         [Header("Color")]
         [SerializeField] private Color fallbackColor;
         [SerializeField] private Color fallbackShadowColor;
@@ -39,7 +41,21 @@ namespace Stupid.stujam01 {
         public void HideMainMenu() => MainMenu.Instance.Hide();
         public void ResetMainMenu() => MainMenu.Instance.ResetMenu();
 
-        #endregion
+        public void Quit() => StartCoroutine(QuitRoutine());
+
+        private IEnumerator QuitRoutine() {
+            yield return new WaitForSeconds(quitDelay);
+            
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.ExitPlaymode();
+#else
+            Application.Quit();
+#endif
+
+            yield break;
+        }
+
+#endregion
 
         #region Color
 
